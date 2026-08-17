@@ -99,6 +99,18 @@ class AgePredictor:
     def __init__(self, model_path="models/best_age_model.pt", device=None, metrics_path=None):
         self.device = torch.device(device or ("cuda" if torch.cuda.is_available() else "cpu"))
 
+        # Auto-download from GitHub Releases if missing on cloud servers
+        if not os.path.exists(model_path):
+            os.makedirs(os.path.dirname(model_path) or ".", exist_ok=True)
+            release_url = "https://github.com/KaRTh1-s/AgeVision-AI/releases/download/v1.0.0/best_age_model.pt"
+            print(f"[INFO] Model not found locally. Downloading from GitHub Release: {release_url}...")
+            try:
+                import urllib.request
+                urllib.request.urlretrieve(release_url, model_path)
+                print(f"[OK] Downloaded model weights to {model_path}")
+            except Exception as e:
+                print(f"[WARN] Could not auto-download model weights: {e}")
+
         # Detect backbone from checkpoint
         backbone_name = "convnext_small.fb_in22k"
         if os.path.exists(model_path):

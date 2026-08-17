@@ -16,7 +16,11 @@ pandas>=1.0.0
 # Optional for GPU support
 # cuda-toolkit (install separately or use torch with CUDA prebuilt)
 
-# Development/Monitoring
-jupyter>=1.0.0
-matplotlib>=3.3.0
-tensorboard>=2.8.0
+# Deep Learning & Multi-Attribute Models
+timm>=0.9.0
+facenet-pytorch>=2.5.0
+transformers>=4.30.0
+
+# Production Deployment Server
+gunicorn>=20.1.0
+flask>=2.0.0
