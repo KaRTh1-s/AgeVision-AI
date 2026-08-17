@@ -1,6 +1,6 @@
 """
 FaceAge AI / AgeVision AI — Web Application
-Comprehensive Multi-Attribute Dashboard (Age, Gender, Grad-CAM, Distribution Chart & Full Model KPIs)
+Multi-Attribute Dashboard with Dedicated Analyze Button, Pristine Initial State & Strict Error State Handling
 """
 
 import os
@@ -33,14 +33,14 @@ def load_predictor():
         print(f"[OK] Model loaded: {MODEL_PATH}")
 
 # ─────────────────────────────────────────────────────────
-# HTML TEMPLATE — Full Feature-Packed Glassmorphism Dashboard
+# HTML TEMPLATE
 # ─────────────────────────────────────────────────────────
 HTML_TEMPLATE = """<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>FaceAge AI — Multi-Attribute Age & Gender Dashboard</title>
+<title>FaceAge AI — AI-Powered Facial Age & Gender Estimation</title>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -57,6 +57,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
     --accent-pink:   #ec4899;
     --accent-orange: #f97316;
     --accent-green:  #22c55e;
+    --accent-red:    #ef4444;
     --text-primary:  #f8fafc;
     --text-muted:    #94a3b8;
     --text-dim:      #64748b;
@@ -74,7 +75,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
     overflow-x: hidden;
   }
 
-  /* Dynamic Glow Background */
+  /* Deep Glow Background */
   body::before {
     content: '';
     position: fixed; inset: 0;
@@ -122,35 +123,12 @@ HTML_TEMPLATE = """<!DOCTYPE html>
     box-shadow: 0 0 20px rgba(56, 189, 248, 0.2);
   }
 
-  .brand-text-col {
-    display: flex;
-    flex-direction: column;
-  }
+  .brand-text-col { display: flex; flex-direction: column; }
+  .logo-title { font-size: 1.6rem; font-weight: 800; letter-spacing: -0.5px; color: #fff; line-height: 1.2; }
+  .logo-title span.highlight { color: var(--accent-blue); text-shadow: 0 0 16px rgba(56, 189, 248, 0.5); }
+  .tagline { font-size: 0.8rem; color: var(--text-muted); font-weight: 500; }
 
-  .logo-title {
-    font-size: 1.6rem;
-    font-weight: 800;
-    letter-spacing: -0.5px;
-    color: #fff;
-    line-height: 1.2;
-  }
-  .logo-title span.highlight {
-    color: var(--accent-blue);
-    text-shadow: 0 0 16px rgba(56, 189, 248, 0.5);
-  }
-
-  .tagline {
-    font-size: 0.8rem;
-    color: var(--text-muted);
-    font-weight: 500;
-  }
-
-  .header-badges {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-
+  .header-badges { display: flex; align-items: center; gap: 10px; }
   .header-badge {
     background: rgba(15, 23, 42, 0.8);
     border: 1px solid var(--border);
@@ -181,9 +159,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
     position: relative;
     transition: all 0.25s ease;
   }
-  .card:hover {
-    border-color: var(--border-hover);
-  }
+  .card:hover { border-color: var(--border-hover); }
 
   .card-title {
     font-size: 0.75rem;
@@ -197,7 +173,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
     justify-content: space-between;
   }
 
-  /* ── Top Grid (3 Major Columns) ── */
+  /* ── Top Grid (3 Columns) ── */
   .top-grid {
     display: grid;
     grid-template-columns: 290px 1fr 360px;
@@ -228,7 +204,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
     height: 190px;
     border-radius: var(--radius-md);
     background: var(--bg-nested);
-    border: 1px dashed rgba(56, 189, 248, 0.25);
+    border: 1.5px dashed rgba(56, 189, 248, 0.25);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -246,7 +222,24 @@ HTML_TEMPLATE = """<!DOCTYPE html>
     width: 100%;
     height: 100%;
     object-fit: cover;
-    display: block;
+    display: none;
+  }
+
+  .upload-placeholder-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    color: var(--text-muted);
+    font-size: 0.78rem;
+    text-align: center;
+    padding: 14px;
+    pointer-events: none;
+  }
+  .upload-placeholder-content .upload-icon {
+    font-size: 2.2rem;
+    color: var(--accent-blue);
+    opacity: 0.8;
   }
 
   .status-pills-row {
@@ -262,38 +255,62 @@ HTML_TEMPLATE = """<!DOCTYPE html>
     align-items: center;
     justify-content: center;
     gap: 4px;
-    background: rgba(34, 197, 94, 0.1);
-    border: 1px solid rgba(34, 197, 94, 0.25);
-    color: var(--accent-green);
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--border);
+    color: var(--text-dim);
     font-size: 0.7rem;
     font-weight: 600;
     padding: 6px 4px;
     border-radius: 8px;
     white-space: nowrap;
+    transition: all 0.25s ease;
+  }
+  .status-pill.success {
+    background: rgba(34, 197, 94, 0.1);
+    border-color: rgba(34, 197, 94, 0.3);
+    color: var(--accent-green);
+  }
+  .status-pill.danger {
+    background: rgba(239, 68, 68, 0.12);
+    border-color: rgba(239, 68, 68, 0.35);
+    color: var(--accent-red);
   }
 
-  .btn-upload {
+  .btn-analyze {
     width: 100%;
-    background: linear-gradient(135deg, #ea580c, #f97316);
+    background: linear-gradient(135deg, #0284c7, #0284c7);
     color: #fff;
     border: none;
     border-radius: var(--radius-sm);
     padding: 13px 16px;
-    font-size: 0.88rem;
+    font-size: 0.9rem;
     font-weight: 700;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 8px;
-    box-shadow: 0 4px 14px rgba(249, 115, 22, 0.3);
+    box-shadow: 0 4px 14px rgba(2, 132, 199, 0.35);
     transition: all 0.2s ease;
   }
-  .btn-upload:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 6px 20px rgba(249, 115, 22, 0.45);
+  .btn-analyze.ready {
+    background: linear-gradient(135deg, #ea580c, #f97316);
+    box-shadow: 0 4px 18px rgba(249, 115, 22, 0.45);
+    animation: pulseBtn 2s infinite;
   }
-  .btn-upload input { display: none; }
+  @keyframes pulseBtn {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(249, 115, 22, 0.5); }
+    50% { box-shadow: 0 0 0 8px rgba(249, 115, 22, 0); }
+  }
+
+  .btn-analyze:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background: rgba(255, 255, 255, 0.08);
+    box-shadow: none;
+    animation: none;
+  }
+  .btn-analyze input { display: none; }
 
   /* Center: Hero Prediction */
   .hero-prediction {
@@ -328,13 +345,19 @@ HTML_TEMPLATE = """<!DOCTYPE html>
     align-items: center;
     gap: 8px;
     padding: 8px 24px;
-    background: rgba(34, 197, 94, 0.08);
-    border: 1.5px solid rgba(34, 197, 94, 0.4);
-    color: var(--accent-green);
+    background: rgba(255, 255, 255, 0.04);
+    border: 1.5px solid var(--border);
+    color: var(--text-muted);
     border-radius: 100px;
     font-size: 0.95rem;
     font-weight: 700;
     margin-bottom: 16px;
+    transition: all 0.3s ease;
+  }
+  .group-badge-main.active {
+    background: rgba(34, 197, 94, 0.08);
+    border-color: rgba(34, 197, 94, 0.4);
+    color: var(--accent-green);
   }
 
   .range-label {
@@ -346,11 +369,28 @@ HTML_TEMPLATE = """<!DOCTYPE html>
   .range-val {
     font-size: 1.5rem;
     font-weight: 800;
-    color: var(--accent-blue);
+    color: var(--text-muted);
     letter-spacing: -0.5px;
+    transition: color 0.3s ease;
   }
+  .range-val.active { color: var(--accent-blue); }
 
-  /* Right: Multi-Attribute 2x2 Grid */
+  /* Error Banner inside Hero */
+  .error-card-display {
+    display: none;
+    background: rgba(239, 68, 68, 0.1);
+    border: 1.5px solid rgba(239, 68, 68, 0.4);
+    border-radius: var(--radius-md);
+    padding: 24px 20px;
+    text-align: center;
+    width: 100%;
+    margin: 10px 0;
+  }
+  .error-card-display .err-icon { font-size: 2.6rem; margin-bottom: 8px; }
+  .error-card-display .err-title { font-size: 1.1rem; font-weight: 800; color: #f87171; margin-bottom: 4px; }
+  .error-card-display .err-desc { font-size: 0.85rem; color: #fca5a5; line-height: 1.5; }
+
+  /* Right: Multi-Attribute 2x2 Stats */
   .stats-multi {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -381,9 +421,10 @@ HTML_TEMPLATE = """<!DOCTYPE html>
   .stat-card-val {
     font-size: 1.25rem;
     font-weight: 800;
-    color: #fff;
+    color: var(--text-muted);
     margin: 6px 0 2px;
   }
+  .stat-card-val.active { color: #fff; }
 
   .stat-card-sub {
     font-size: 0.68rem;
@@ -423,11 +464,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
     gap: 8px;
   }
 
-  .cam-item-title {
-    font-size: 0.75rem;
-    color: var(--text-muted);
-    font-weight: 600;
-  }
+  .cam-item-title { font-size: 0.75rem; color: var(--text-muted); font-weight: 600; }
 
   .cam-img-wrap {
     width: 100%;
@@ -439,14 +476,12 @@ HTML_TEMPLATE = """<!DOCTYPE html>
     display: flex;
     align-items: center;
     justify-content: center;
-  }
-  .cam-img-wrap img { width: 100%; height: 100%; object-fit: cover; }
-
-  .cam-arrow {
-    font-size: 1.4rem;
     color: var(--text-dim);
-    font-weight: 300;
+    font-size: 0.75rem;
   }
+  .cam-img-wrap img { width: 100%; height: 100%; object-fit: cover; display: none; }
+
+  .cam-arrow { font-size: 1.4rem; color: var(--text-dim); font-weight: 300; }
 
   /* Distribution Chart */
   .chart-wrapper {
@@ -482,7 +517,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 
   .chart-bar-fill {
     width: 100%;
-    background: rgba(56, 189, 248, 0.2);
+    background: rgba(56, 189, 248, 0.12);
     border-radius: 4px 4px 0 0;
     transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     min-height: 4px;
@@ -494,12 +529,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
     box-shadow: 0 0 16px rgba(56, 189, 248, 0.6);
   }
 
-  .chart-bar-label {
-    font-size: 0.65rem;
-    color: var(--text-dim);
-    margin-top: 6px;
-    white-space: nowrap;
-  }
+  .chart-bar-label { font-size: 0.65rem; color: var(--text-dim); margin-top: 6px; white-space: nowrap; }
 
   .chart-tooltip {
     position: absolute;
@@ -517,8 +547,19 @@ HTML_TEMPLATE = """<!DOCTYPE html>
     transition: opacity 0.2s ease;
   }
   .chart-bar-col:hover .chart-tooltip,
-  .chart-bar-col.peak .chart-tooltip {
-    opacity: 1;
+  .chart-bar-col.peak .chart-tooltip { opacity: 1; }
+
+  .chart-placeholder-msg {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-dim);
+    font-size: 0.8rem;
+    background: rgba(8, 14, 28, 0.8);
+    border-radius: var(--radius-sm);
+    z-index: 10;
   }
 
   /* ── Bottom Summary Row (6 KPIs) ── */
@@ -528,12 +569,8 @@ HTML_TEMPLATE = """<!DOCTYPE html>
     gap: 12px;
   }
 
-  @media (max-width: 1000px) {
-    .bottom-summary-grid { grid-template-columns: repeat(3, 1fr); }
-  }
-  @media (max-width: 600px) {
-    .bottom-summary-grid { grid-template-columns: repeat(2, 1fr); }
-  }
+  @media (max-width: 1000px) { .bottom-summary-grid { grid-template-columns: repeat(3, 1fr); } }
+  @media (max-width: 600px) { .bottom-summary-grid { grid-template-columns: repeat(2, 1fr); } }
 
   .kpi-card {
     background: var(--bg-nested);
@@ -559,32 +596,13 @@ HTML_TEMPLATE = """<!DOCTYPE html>
     flex-shrink: 0;
   }
 
-  .kpi-content {
-    display: flex;
-    flex-direction: column;
-  }
+  .kpi-content { display: flex; flex-direction: column; }
+  .kpi-label { font-size: 0.68rem; color: var(--text-dim); font-weight: 600; text-transform: uppercase; letter-spacing: 0.3px; }
+  .kpi-val { font-size: 1.15rem; font-weight: 800; color: #fff; }
+  .kpi-unit { font-size: 0.65rem; color: var(--text-muted); }
 
-  .kpi-label {
-    font-size: 0.68rem;
-    color: var(--text-dim);
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.3px;
-  }
-
-  .kpi-val {
-    font-size: 1.15rem;
-    font-weight: 800;
-    color: #fff;
-  }
-
-  .kpi-unit {
-    font-size: 0.65rem;
-    color: var(--text-muted);
-  }
-
-  /* Error Toast */
-  .error-toast {
+  /* Toast Notification */
+  .toast-alert {
     position: fixed;
     bottom: 24px;
     right: 24px;
@@ -602,13 +620,19 @@ HTML_TEMPLATE = """<!DOCTYPE html>
   }
   @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
-  /* Footer */
-  footer {
-    text-align: center;
-    padding-top: 24px;
-    font-size: 0.75rem;
-    color: var(--text-dim);
+  /* Spinner */
+  .spinner {
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+    display: inline-block;
   }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  footer { text-align: center; padding-top: 24px; font-size: 0.75rem; color: var(--text-dim); }
 </style>
 </head>
 <body>
@@ -633,25 +657,34 @@ HTML_TEMPLATE = """<!DOCTYPE html>
   <!-- Top 3-Card Grid -->
   <div class="top-grid">
 
-    <!-- 1. Upload Box -->
+    <!-- 1. Upload Column -->
     <div class="card upload-box">
       <div class="card-title" style="width: 100%;">
-        <span>Uploaded Image</span>
+        <span>Select Portrait Photo</span>
         <span>📸</span>
       </div>
       
-      <div class="img-preview-frame" id="drop-zone" onclick="document.getElementById('file-upload').click()">
-        <img id="main-preview-img" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100' fill='%2364748b' viewBox='0 0 16 16'><path d='M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4zm-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10c-2.29 0-3.516.68-4.168 1.332-.678.678-.83 1.418-.832 1.664h10z'/></svg>" style="opacity: 0.4; width: 64px; height: 64px; object-fit: contain;">
+      <!-- Click area to browse/select image -->
+      <div class="img-preview-frame" id="drop-zone" onclick="document.getElementById('file-input').click()">
+        <img id="main-preview-img" src="" alt="Face Preview">
+        <div class="upload-placeholder-content" id="upload-prompt">
+          <div class="upload-icon">📁</div>
+          <div><strong>Click to Browse</strong> or Drag & Drop Photo</div>
+          <div style="font-size: 0.7rem; color: var(--text-dim);">JPEG, PNG or WebP</div>
+        </div>
       </div>
+
+      <input type="file" id="file-input" accept="image/*" onchange="onFileSelected(event)" style="display: none;">
 
       <div class="status-pills-row">
-        <div class="status-pill" id="pill-face">✔ Face Verified</div>
-        <div class="status-pill" id="pill-quality">✔ Quality: Sharp</div>
+        <div class="status-pill" id="pill-face">Face: Waiting</div>
+        <div class="status-pill" id="pill-quality">Quality: Waiting</div>
       </div>
 
-      <button class="btn-upload" onclick="document.getElementById('file-upload').click()">
-        <input type="file" id="file-upload" accept="image/*" onchange="handleFileSelect(event)">
-        <span>⬆ Upload New Image</span>
+      <!-- Explicit Analyze Button -->
+      <button class="btn-analyze" id="btn-analyze" onclick="startAnalysis()" disabled>
+        <span id="btn-icon">⚡</span>
+        <span id="btn-label">Analyze Image</span>
       </button>
     </div>
 
@@ -659,59 +692,70 @@ HTML_TEMPLATE = """<!DOCTYPE html>
     <div class="card hero-prediction">
       <div class="card-title" style="margin-bottom: 0;">PREDICTED AGE</div>
       
-      <div class="giant-age-num" id="hero-age">34</div>
-      <div class="years-sub">— YEARS —</div>
+      <!-- Default Age Display State -->
+      <div id="hero-normal-content" style="width: 100%;">
+        <div class="giant-age-num" id="hero-age">—</div>
+        <div class="years-sub" id="hero-sub">— YEARS —</div>
 
-      <div class="group-badge-main" id="hero-group">
-        <span>👤</span>
-        <span id="hero-group-text">Young Adult</span>
+        <div class="group-badge-main" id="hero-group">
+          <span id="hero-group-icon">👤</span>
+          <span id="hero-group-text">Waiting for Analysis</span>
+        </div>
+
+        <div class="range-label">Estimated Age Range (95% CI)</div>
+        <div class="range-val" id="hero-range">—</div>
       </div>
 
-      <div class="range-label">Estimated Age Range (95% CI)</div>
-      <div class="range-val" id="hero-range">31 – 37</div>
+      <!-- Prominent Error State (Replaces normal content on validation fail) -->
+      <div class="error-card-display" id="hero-error-content">
+        <div class="err-icon">⚠️</div>
+        <div class="err-title" id="hero-err-title">Quality Check Failed</div>
+        <div class="err-desc" id="hero-err-desc">Please upload a sharp, clear portrait of a person.</div>
+      </div>
+
     </div>
 
-    <!-- 3. Multi-Attribute 2x2 Stats Grid (Including Gender) -->
+    <!-- 3. Multi-Attribute 2x2 Stats Grid -->
     <div class="stats-multi">
       
-      <!-- Stat 1: Dedicated Gender Card -->
+      <!-- Stat 1: Gender -->
       <div class="stat-card-mini" style="border-left: 3px solid var(--accent-pink);">
         <div class="stat-card-header">
           <span class="stat-card-icon" id="gender-icon">⚧</span>
           <span>Predicted Gender</span>
         </div>
-        <div class="stat-card-val" id="stat-gender-val" style="color: #f472b6;">Male</div>
-        <div class="stat-card-sub pink" id="stat-gender-conf">Confidence: 98.6%</div>
+        <div class="stat-card-val" id="stat-gender-val">—</div>
+        <div class="stat-card-sub pink" id="stat-gender-conf">Confidence: —</div>
       </div>
 
-      <!-- Stat 2: Confidence -->
+      <!-- Stat 2: Age Confidence -->
       <div class="stat-card-mini" style="border-left: 3px solid var(--accent-green);">
         <div class="stat-card-header">
           <span class="stat-card-icon">🛡</span>
           <span>Age Confidence</span>
         </div>
-        <div class="stat-card-val" id="stat-confidence" style="color: #4ade80;">94.2%</div>
-        <div class="stat-card-sub green">Intrinsic ±1.96σ Metric</div>
+        <div class="stat-card-val" id="stat-confidence">—</div>
+        <div class="stat-card-sub green" id="stat-conf-sub">Intrinsic ±1.96σ Metric</div>
       </div>
 
-      <!-- Stat 3: Inference Time -->
+      <!-- Stat 3: Inference Latency -->
       <div class="stat-card-mini">
         <div class="stat-card-header">
           <span class="stat-card-icon">⏱</span>
           <span>Inference Time</span>
         </div>
-        <div class="stat-card-val" id="stat-inf-time">98 ms</div>
-        <div class="stat-card-sub green">● Ultra Fast (TTA)</div>
+        <div class="stat-card-val" id="stat-inf-time">—</div>
+        <div class="stat-card-sub green" id="stat-time-sub">● CUDA Accelerated</div>
       </div>
 
-      <!-- Stat 4: Age Group -->
+      <!-- Stat 4: Age Cohort -->
       <div class="stat-card-mini">
         <div class="stat-card-header">
           <span class="stat-card-icon">👥</span>
           <span>Age Cohort</span>
         </div>
-        <div class="stat-card-val" id="stat-group-title">Young Adult</div>
-        <div class="stat-card-sub blue" id="stat-group-sub">Bracket: (20 – 35 yrs)</div>
+        <div class="stat-card-val" id="stat-group-title">—</div>
+        <div class="stat-card-sub blue" id="stat-group-sub">Bracket: —</div>
       </div>
 
     </div>
@@ -719,7 +763,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
   </div>
 
   <!-- Middle 2-Panel Row -->
-  <div class="middle-grid">
+  <div class="middle-grid" id="middle-panels">
 
     <!-- Left Panel: AI Explanation (Grad-CAM) -->
     <div class="card">
@@ -728,8 +772,9 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         
         <div class="cam-item">
           <div class="cam-item-title">Original Face Crop</div>
-          <div class="cam-img-wrap">
-            <img id="cam-orig" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100' fill='%23334155'><rect width='100' height='100'/></svg>">
+          <div class="cam-img-wrap" id="cam-orig-wrap">
+            <span id="cam-orig-placeholder">No Image Analyzed</span>
+            <img id="cam-orig" alt="Original Crop">
           </div>
         </div>
 
@@ -737,8 +782,9 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 
         <div class="cam-item">
           <div class="cam-item-title">AI Attention Focus</div>
-          <div class="cam-img-wrap">
-            <img id="cam-heatmap" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100' fill='%231e293b'><rect width='100' height='100'/></svg>">
+          <div class="cam-img-wrap" id="cam-heatmap-wrap">
+            <span id="cam-heatmap-placeholder">No Heatmap</span>
+            <img id="cam-heatmap" alt="Grad-CAM Overlay">
           </div>
         </div>
 
@@ -749,6 +795,9 @@ HTML_TEMPLATE = """<!DOCTYPE html>
     <div class="card">
       <div class="card-title">AGE PREDICTION DISTRIBUTION (DLDL Probability)</div>
       <div class="chart-wrapper">
+        <div class="chart-placeholder-msg" id="chart-placeholder">
+          Upload and analyze a photo to view probability distribution
+        </div>
         <div class="chart-bars-row" id="chart-bars-container">
           <!-- Populated dynamically via JS -->
         </div>
@@ -757,7 +806,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 
   </div>
 
-  <!-- Bottom Row: Model Performance Summary (6 KPIs) -->
+  <!-- Bottom Row: Global Model Performance Benchmark Summary -->
   <div class="card">
     <div class="card-title" style="margin-bottom: 14px;">MODEL PERFORMANCE BENCHMARK SUMMARY</div>
     
@@ -820,8 +869,8 @@ HTML_TEMPLATE = """<!DOCTYPE html>
     </div>
   </div>
 
-  <!-- Toast Error -->
-  <div class="error-toast" id="toast-err">
+  <!-- Toast Alert -->
+  <div class="toast-alert" id="toast-err">
     ⚠️ <span id="toast-msg">Image processing failed.</span>
   </div>
 
@@ -832,60 +881,47 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 </div>
 
 <script>
-const DEFAULT_BINS = [
-  { bin: "1-10", probability: 0.01, is_peak: false },
-  { bin: "11-20", probability: 0.02, is_peak: false },
-  { bin: "21-30", probability: 0.15, is_peak: false },
-  { bin: "31-40", probability: 0.72, is_peak: true },
-  { bin: "41-50", probability: 0.08, is_peak: false },
-  { bin: "51-60", probability: 0.01, is_peak: false },
-  { bin: "61-70", probability: 0.005, is_peak: false },
-  { bin: "71-80", probability: 0.001, is_peak: false },
-  { bin: "81-90", probability: 0.000, is_peak: false },
-  { bin: "91-100", probability: 0.000, is_peak: false }
-];
+let selectedFile = null;
 
-renderChart(DEFAULT_BINS);
-
-function renderChart(bins) {
-  const container = document.getElementById('chart-bars-container');
-  container.innerHTML = '';
-  
-  const maxProb = Math.max(...bins.map(b => b.probability), 0.1);
-
-  bins.forEach(item => {
-    const col = document.createElement('div');
-    col.className = 'chart-bar-col' + (item.is_peak ? ' peak' : '');
-
-    const heightPct = Math.max((item.probability / maxProb) * 100, 3);
-
-    col.innerHTML = `
-      <div class="chart-tooltip">${item.bin} yrs: ${(item.probability * 100).toFixed(1)}%</div>
-      <div class="chart-bar-fill" style="height: ${heightPct}%;"></div>
-      <div class="chart-bar-label">${item.bin}</div>
-    `;
-    container.appendChild(col);
-  });
-}
-
-function handleFileSelect(e) {
+// Handle file selection (Browse or Drop)
+function onFileSelected(e) {
   const file = e.target.files[0];
   if (!file) return;
+  loadSelectedFile(file);
+}
 
+function loadSelectedFile(file) {
+  selectedFile = file;
+
+  // Show preview
   const reader = new FileReader();
   reader.onload = function(evt) {
-    document.getElementById('main-preview-img').src = evt.target.result;
-    document.getElementById('main-preview-img').style.opacity = '1';
-    document.getElementById('main-preview-img').style.width = '100%';
-    document.getElementById('main-preview-img').style.height = '100%';
-    document.getElementById('main-preview-img').style.objectFit = 'cover';
+    const previewImg = document.getElementById('main-preview-img');
+    previewImg.src = evt.target.result;
+    previewImg.style.display = 'block';
+    document.getElementById('upload-prompt').style.display = 'none';
   };
   reader.readAsDataURL(file);
 
-  uploadAndPredict(file);
+  // Update status pills
+  const pillFace = document.getElementById('pill-face');
+  const pillQuality = document.getElementById('pill-quality');
+  pillFace.className = 'status-pill';
+  pillFace.textContent = 'Photo Ready';
+  pillQuality.className = 'status-pill';
+  pillQuality.textContent = 'Ready to Analyze';
+
+  // Enable Analyze Button
+  const btn = document.getElementById('btn-analyze');
+  btn.disabled = false;
+  btn.classList.add('ready');
+  document.getElementById('btn-label').textContent = '⚡ Analyze Image';
+
+  // Reset results display to waiting state until analyzed
+  resetResultsToWaiting();
 }
 
-// Drag & drop support
+// Drag & Drop
 const dropZone = document.getElementById('drop-zone');
 dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.style.borderColor = '#38bdf8'; });
 dropZone.addEventListener('dragleave', () => { dropZone.style.borderColor = 'rgba(56, 189, 248, 0.25)'; });
@@ -893,13 +929,54 @@ dropZone.addEventListener('drop', (e) => {
   e.preventDefault();
   dropZone.style.borderColor = 'rgba(56, 189, 248, 0.25)';
   if (e.dataTransfer.files.length) {
-    handleFileSelect({ target: { files: e.dataTransfer.files } });
+    loadSelectedFile(e.dataTransfer.files[0]);
   }
 });
 
-async function uploadAndPredict(file) {
+function resetResultsToWaiting() {
+  document.getElementById('hero-normal-content').style.display = 'block';
+  document.getElementById('hero-error-content').style.display = 'none';
+
+  document.getElementById('hero-age').textContent = '—';
+  document.getElementById('hero-group-text').textContent = 'Ready for Analysis';
+  document.getElementById('hero-group').classList.remove('active');
+  document.getElementById('hero-range').textContent = '—';
+  document.getElementById('hero-range').classList.remove('active');
+
+  document.getElementById('stat-gender-val').textContent = '—';
+  document.getElementById('stat-gender-val').classList.remove('active');
+  document.getElementById('stat-gender-conf').textContent = 'Confidence: —';
+
+  document.getElementById('stat-confidence').textContent = '—';
+  document.getElementById('stat-confidence').classList.remove('active');
+
+  document.getElementById('stat-inf-time').textContent = '—';
+  document.getElementById('stat-group-title').textContent = '—';
+  document.getElementById('stat-group-sub').textContent = 'Bracket: —';
+
+  // Reset Grad-CAM
+  document.getElementById('cam-orig').style.display = 'none';
+  document.getElementById('cam-orig-placeholder').style.display = 'block';
+  document.getElementById('cam-heatmap').style.display = 'none';
+  document.getElementById('cam-heatmap-placeholder').style.display = 'block';
+
+  // Reset Chart
+  document.getElementById('chart-placeholder').style.display = 'flex';
+  document.getElementById('chart-bars-container').innerHTML = '';
+}
+
+// Triggered ONLY when clicking "⚡ Analyze Image"
+async function startAnalysis() {
+  if (!selectedFile) return;
+
+  const btn = document.getElementById('btn-analyze');
+  btn.disabled = true;
+  btn.classList.remove('ready');
+  document.getElementById('btn-icon').innerHTML = '<div class="spinner"></div>';
+  document.getElementById('btn-label').textContent = 'Analyzing...';
+
   const formData = new FormData();
-  formData.append('image', file);
+  formData.append('image', selectedFile);
 
   const startTime = performance.now();
 
@@ -913,64 +990,162 @@ async function uploadAndPredict(file) {
     const elapsed = Math.round(performance.now() - startTime);
 
     if (!resp.ok || data.error) {
-      showError(data.error || "Image analysis failed.");
+      // ⚠️ ERROR / VALIDATION FAILURE STATE
+      displayErrorState(data.error || "Image quality verification failed.");
       return;
     }
 
-    // 1. Predicted Age & Range
-    document.getElementById('hero-age').textContent = data.predicted_age_int || Math.round(data.predicted_age);
-    document.getElementById('hero-group-text').textContent = data.predicted_age_group;
-    document.getElementById('hero-range').textContent = data.likely_age_range;
-
-    // 2. Inference Time
-    document.getElementById('stat-inf-time').textContent = elapsed + ' ms';
-
-    // 3. Confidence
-    document.getElementById('stat-confidence').textContent = (data.confidence_pct || 94.2) + '%';
-    
-    // 4. Prominent Gender Card
-    if (data.predicted_gender && data.predicted_gender !== "Unknown") {
-      const g = data.predicted_gender;
-      document.getElementById('stat-gender-val').textContent = g;
-      document.getElementById('stat-gender-conf').textContent = `Confidence: ${data.gender_confidence}`;
-      document.getElementById('gender-icon').textContent = (g.toLowerCase() === 'female') ? '👩' : '👨';
-      document.getElementById('stat-gender-val').style.color = (g.toLowerCase() === 'female') ? '#f472b6' : '#38bdf8';
-    }
-
-    // 5. Age Cohort
-    document.getElementById('stat-group-title').textContent = data.predicted_age_group;
-    const groupRanges = {
-      'Child': '(0 – 12 yrs)',
-      'Teenager': '(13 – 19 yrs)',
-      'Young Adult': '(20 – 35 yrs)',
-      'Adult': '(36 – 59 yrs)',
-      'Senior': '(60+ yrs)'
-    };
-    document.getElementById('stat-group-sub').textContent = 'Bracket: ' + (groupRanges[data.predicted_age_group] || '(0 – 100 yrs)');
-
-    // 6. Grad-CAM and Original Face updates
-    if (data.original_face_b64) {
-      document.getElementById('cam-orig').src = data.original_face_b64;
-    }
-    if (data.gradcam_b64) {
-      document.getElementById('cam-heatmap').src = data.gradcam_b64;
-    }
-
-    // 7. Render Distribution chart
-    if (data.distribution_bins && data.distribution_bins.length) {
-      renderChart(data.distribution_bins);
-    }
+    // ✅ SUCCESS STATE
+    displaySuccessState(data, elapsed);
 
   } catch (err) {
-    showError("Network connection error: " + err.message);
+    displayErrorState("Network connection error: " + err.message);
+  } finally {
+    btn.disabled = false;
+    btn.classList.add('ready');
+    document.getElementById('btn-icon').textContent = '⚡';
+    document.getElementById('btn-label').textContent = 'Re-Analyze Image';
   }
 }
 
-function showError(msg) {
+function displaySuccessState(data, elapsed) {
+  // 1. Status Pills
+  const pillFace = document.getElementById('pill-face');
+  const pillQuality = document.getElementById('pill-quality');
+  pillFace.className = 'status-pill success';
+  pillFace.textContent = '✔ Face Verified';
+  pillQuality.className = 'status-pill success';
+  pillQuality.textContent = '✔ Quality: Sharp';
+
+  // 2. Hero Box
+  document.getElementById('hero-normal-content').style.display = 'block';
+  document.getElementById('hero-error-content').style.display = 'none';
+
+  document.getElementById('hero-age').textContent = data.predicted_age_int || Math.round(data.predicted_age);
+  document.getElementById('hero-group-text').textContent = data.predicted_age_group;
+  document.getElementById('hero-group').classList.add('active');
+  document.getElementById('hero-range').textContent = data.likely_age_range;
+  document.getElementById('hero-range').classList.add('active');
+
+  // 3. Stats Grid
+  document.getElementById('stat-inf-time').textContent = elapsed + ' ms';
+  document.getElementById('stat-inf-time').classList.add('active');
+
+  document.getElementById('stat-confidence').textContent = (data.confidence_pct || 94.2) + '%';
+  document.getElementById('stat-confidence').classList.add('active');
+
+  if (data.predicted_gender && data.predicted_gender !== "Unknown") {
+    const g = data.predicted_gender;
+    const isFemale = g.toLowerCase() === 'female';
+    document.getElementById('stat-gender-val').textContent = g;
+    document.getElementById('stat-gender-val').classList.add('active');
+    document.getElementById('stat-gender-val').style.color = isFemale ? '#f472b6' : '#38bdf8';
+    document.getElementById('stat-gender-conf').textContent = `Confidence: ${data.gender_confidence}`;
+    document.getElementById('gender-icon').textContent = isFemale ? '👩' : '👨';
+  }
+
+  document.getElementById('stat-group-title').textContent = data.predicted_age_group;
+  document.getElementById('stat-group-title').classList.add('active');
+  const groupRanges = {
+    'Child': '(0 – 12 yrs)',
+    'Teenager': '(13 – 19 yrs)',
+    'Young Adult': '(20 – 35 yrs)',
+    'Adult': '(36 – 59 yrs)',
+    'Senior': '(60+ yrs)'
+  };
+  document.getElementById('stat-group-sub').textContent = 'Bracket: ' + (groupRanges[data.predicted_age_group] || '(0 – 100 yrs)');
+
+  // 4. Grad-CAM Images
+  if (data.original_face_b64) {
+    const orig = document.getElementById('cam-orig');
+    orig.src = data.original_face_b64;
+    orig.style.display = 'block';
+    document.getElementById('cam-orig-placeholder').style.display = 'none';
+  }
+  if (data.gradcam_b64) {
+    const cam = document.getElementById('cam-heatmap');
+    cam.src = data.gradcam_b64;
+    cam.style.display = 'block';
+    document.getElementById('cam-heatmap-placeholder').style.display = 'none';
+  }
+
+  // 5. Distribution Bar Chart
+  if (data.distribution_bins && data.distribution_bins.length) {
+    document.getElementById('chart-placeholder').style.display = 'none';
+    renderChart(data.distribution_bins);
+  }
+}
+
+function displayErrorState(errorMessage) {
+  // 1. Status Pills -> Red Danger
+  const pillFace = document.getElementById('pill-face');
+  const pillQuality = document.getElementById('pill-quality');
+  pillFace.className = 'status-pill danger';
+  pillFace.textContent = '❌ Verification Failed';
+  pillQuality.className = 'status-pill danger';
+  pillQuality.textContent = '❌ Unusable Photo';
+
+  // 2. Hero Box -> Show prominent Error Card
+  document.getElementById('hero-normal-content').style.display = 'none';
+  const errCard = document.getElementById('hero-error-content');
+  errCard.style.display = 'block';
+  document.getElementById('hero-err-title').textContent = 'Validation Rejected';
+  document.getElementById('hero-err-desc').textContent = errorMessage;
+
+  // 3. Reset Stats
+  document.getElementById('stat-gender-val').textContent = 'N/A';
+  document.getElementById('stat-gender-val').classList.remove('active');
+  document.getElementById('stat-gender-conf').textContent = 'Rejected';
+
+  document.getElementById('stat-confidence').textContent = '0%';
+  document.getElementById('stat-confidence').classList.remove('active');
+
+  document.getElementById('stat-inf-time').textContent = '—';
+  document.getElementById('stat-group-title').textContent = 'N/A';
+  document.getElementById('stat-group-sub').textContent = 'Bracket: —';
+
+  // 4. Hide / Clear Grad-CAM
+  document.getElementById('cam-orig').style.display = 'none';
+  document.getElementById('cam-orig-placeholder').style.display = 'block';
+  document.getElementById('cam-orig-placeholder').textContent = 'No Face Verified';
+  document.getElementById('cam-heatmap').style.display = 'none';
+  document.getElementById('cam-heatmap-placeholder').style.display = 'block';
+  document.getElementById('cam-heatmap-placeholder').textContent = 'No Heatmap Available';
+
+  // 5. Hide / Clear Distribution Chart
+  document.getElementById('chart-placeholder').style.display = 'flex';
+  document.getElementById('chart-placeholder').textContent = '⚠️ Distribution unavailable due to validation rejection';
+  document.getElementById('chart-bars-container').innerHTML = '';
+
+  // Toast
+  showToast(errorMessage);
+}
+
+function renderChart(bins) {
+  const container = document.getElementById('chart-bars-container');
+  container.innerHTML = '';
+  const maxProb = Math.max(...bins.map(b => b.probability), 0.1);
+
+  bins.forEach(item => {
+    const col = document.createElement('div');
+    col.className = 'chart-bar-col' + (item.is_peak ? ' peak' : '');
+
+    const heightPct = Math.max((item.probability / maxProb) * 100, 4);
+
+    col.innerHTML = `
+      <div class="chart-tooltip">${item.bin} yrs: ${(item.probability * 100).toFixed(1)}%</div>
+      <div class="chart-bar-fill" style="height: ${heightPct}%;"></div>
+      <div class="chart-bar-label">${item.bin}</div>
+    `;
+    container.appendChild(col);
+  });
+}
+
+function showToast(msg) {
   const toast = document.getElementById('toast-err');
   document.getElementById('toast-msg').textContent = msg;
   toast.style.display = 'block';
-  setTimeout(() => { toast.style.display = 'none'; }, 4500);
+  setTimeout(() => { toast.style.display = 'none'; }, 5000);
 }
 </script>
 
@@ -1018,7 +1193,7 @@ def predict():
 
 if __name__ == "__main__":
     print("=" * 60)
-    print("  FaceAge AI — Starting Multi-Attribute Web Server")
+    print("  FaceAge AI — Starting Web Server")
     print("=" * 60)
     load_predictor()
     print("\n  Open your browser: http://127.0.0.1:8080\n")
