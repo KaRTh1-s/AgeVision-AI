@@ -6,7 +6,5 @@ numpy
 timm
 facenet-pytorch
 transformers
-flask
-gunicorn
 streamlit
 pandas

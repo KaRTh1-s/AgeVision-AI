@@ -58,3 +58,8 @@ logs/
 *.VisualStudioConfig
 *.exe
 cloudflared.exe
+
+# Local-only / dev artefacts
+checkpoints/
+dataset_manifest_summary.txt
+monitor.py
