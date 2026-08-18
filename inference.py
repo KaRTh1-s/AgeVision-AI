@@ -113,17 +113,34 @@ class AgePredictor:
             except Exception as e:
                 print(f"[WARN] Could not auto-download model weights: {e}")
 
+        torch.set_grad_enabled(False)
+        if torch.get_num_threads() > 2:
+            torch.set_num_threads(2)
+
         # Detect backbone from checkpoint
         backbone_name = "convnext_small.fb_in22k"
+        state = None
         if os.path.exists(model_path):
             ckpt = torch.load(model_path, map_location="cpu", weights_only=False)
             if "backbone" in ckpt:
                 backbone_name = ckpt["backbone"]
             elif "config" in ckpt and "backbone_name" in ckpt["config"]:
                 backbone_name = ckpt["config"]["backbone_name"]
+            state = ckpt.get("model_state_dict", ckpt)
+            del ckpt
+            import gc
+            gc.collect()
 
         self.model = FaceAgeModel(num_classes=101, backbone_name=backbone_name).to(self.device)
         self.model.eval()
+
+        if state is not None:
+            self.model.load_state_dict(state, strict=False)
+            del state
+            import gc
+            gc.collect()
+            print(f"[OK] Loaded: {model_path} (backbone={backbone_name})")
+
         self.validator = ImageValidator(device=self.device)
         
         # Load pre-trained gender classifier
@@ -134,10 +151,8 @@ class AgePredictor:
             print(f"[WARN] Failed to load gender model: {e}")
             self.gender_pipe = None
 
-        if os.path.exists(model_path):
-            state = ckpt.get("model_state_dict", ckpt)
-            self.model.load_state_dict(state, strict=False)
-            print(f"[OK] Loaded: {model_path} (backbone={backbone_name})")
+        import gc
+        gc.collect()
 
         self.transform = transforms.Compose([
             transforms.ToPILImage(),

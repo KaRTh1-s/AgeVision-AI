@@ -1,0 +1,11 @@
+--extra-index-url https://download.pytorch.org/whl/cpu
+torch>=2.0.0
+torchvision>=0.15.0
+opencv-python-headless>=4.5.0
+Pillow>=8.0.0
+numpy>=1.21.0
+timm>=0.9.0
+facenet-pytorch>=2.5.0
+transformers>=4.30.0
+flask>=2.0.0
+gunicorn>=20.1.0
