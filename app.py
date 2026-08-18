@@ -28,9 +28,25 @@ METRICS_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "results
 def load_predictor():
     global predictor
     if predictor is None:
-        from inference import AgePredictor
-        predictor = AgePredictor(model_path=MODEL_PATH, metrics_path=METRICS_PATH)
-        print(f"[OK] Model loaded: {MODEL_PATH}")
+        try:
+            from inference import AgePredictor
+            predictor = AgePredictor(model_path=MODEL_PATH, metrics_path=METRICS_PATH)
+            print(f"[OK] Model loaded: {MODEL_PATH}")
+        except Exception as e:
+            print(f"[ERROR] Failed to load model in load_predictor: {e}")
+    return predictor
+
+def get_predictor():
+    global predictor
+    if predictor is None:
+        load_predictor()
+    return predictor
+
+# Warm up model at module import time (Crucial for Gunicorn / Render / WSGI servers)
+try:
+    load_predictor()
+except Exception as _e:
+    print(f"[WARN] Initial model warmup deferred: {_e}")
 
 # ─────────────────────────────────────────────────────────
 # HTML TEMPLATE
@@ -1177,7 +1193,11 @@ def predict():
         pil_image = Image.open(io.BytesIO(image_bytes)).convert("RGB")
         img_array = np.array(pil_image)
 
-        result = predictor.predict(img_array)
+        pred = get_predictor()
+        if pred is None:
+            return jsonify({"error": "Model initialization failed on server. Please check logs."}), 500
+
+        result = pred.predict(img_array)
 
         if "error" in result:
             return jsonify({"error": result["error"]}), 400

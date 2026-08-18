@@ -103,11 +103,13 @@ class AgePredictor:
         if not os.path.exists(model_path):
             os.makedirs(os.path.dirname(model_path) or ".", exist_ok=True)
             release_url = "https://github.com/KaRTh1-s/AgeVision-AI/releases/download/v1.0.0/best_age_model.pt"
-            print(f"[INFO] Model not found locally. Downloading from GitHub Release: {release_url}...")
+            print(f"[INFO] Model not found locally at {model_path}. Downloading from GitHub Release: {release_url}...")
             try:
                 import urllib.request
-                urllib.request.urlretrieve(release_url, model_path)
-                print(f"[OK] Downloaded model weights to {model_path}")
+                req = urllib.request.Request(release_url, headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"})
+                with urllib.request.urlopen(req) as response, open(model_path, "wb") as out_file:
+                    out_file.write(response.read())
+                print(f"[OK] Downloaded model weights successfully to {model_path}")
             except Exception as e:
                 print(f"[WARN] Could not auto-download model weights: {e}")
 
